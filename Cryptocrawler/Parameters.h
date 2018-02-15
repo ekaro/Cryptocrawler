@@ -1,12 +1,14 @@
 #pragma once
 
+//#include "unique_sqlite.hpp"
+
 #include <fstream>
-#include <time.h>
 #include <string>
 #include <vector>
-//#include <jansson.h>
-//#include <curl/curl.h>
+#include <curl/curl.h>
 
+// Stores all the parameters defined
+// in the configuration file.
 struct Parameters {
 
 	std::vector<std::string> exchName;
@@ -15,28 +17,37 @@ struct Parameters {
 	std::vector<bool> isImplemented;
 	std::vector<std::string> tickerUrl;
 
-	//CURL* curl;
+	CURL* curl;
 	double spreadEntry;
 	double spreadTarget;
 	unsigned maxLength;
 	double priceDeltaLim;
-	bool aggressiveVolume;
 	double trailingLim;
+	unsigned trailingCount;
 	double orderBookFactor;
 	bool demoMode;
+	std::string leg1;
+	std::string leg2;
 	bool verbose;
 	std::ofstream* logFile;
-	unsigned gapSec;
+	unsigned interval;
 	unsigned debugMaxIteration;
-	bool useFullCash;
-	double untouchedCash;
-	double cashForTesting;
+	bool useFullExposure;
+	double testedExposure;
 	double maxExposure;
+	bool useVolatility;
+	unsigned volatilityPeriod;
+	std::string cacert;
 
 	std::string bitfinexApi;
 	std::string bitfinexSecret;
 	double bitfinexFees;
-	bool bitfinexCanShort;
+	bool bitfinexEnable;
+	
+	std::string binanceApi;
+	std::string binanceSecret;
+	double binanceFees;
+	bool binanceEnable;
 
 	bool sendEmail;
 	std::string senderAddress;
@@ -45,14 +56,18 @@ struct Parameters {
 	std::string smtpServerAddress;
 	std::string receiverAddress;
 
+	std::string dbFile;
+	//unique_sqlite dbConn;
+
 	Parameters(std::string fileName);
 
 	void addExchange(std::string n, double f, bool h, bool m);
 
 	int nbExch() const;
-
 };
 
+// Copies the parameters from the configuration file
+// to the Parameter structure.
 std::string getParameter(std::string parameter, std::ifstream& configFile);
 
 bool getBool(std::string value);

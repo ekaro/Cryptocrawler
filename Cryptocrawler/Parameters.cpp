@@ -1,32 +1,105 @@
-#include "stdafx.h"
-#include <iostream>
 #include "parameters.h"
-//#include "time_fun.h"
 
+#include <iostream>
+#include <cstdlib>
+#include <cassert>
+
+
+static std::string findConfigFile(std::string fileName) {
+	// local directory
+	{
+		std::ifstream configFile(fileName);
+
+		// Keep the first match
+		if (configFile.good()) {
+			return fileName;
+		}
+	}
+
+	// Unix user settings directory
+	{
+		/*char *home = getenv("HOME");
+
+		if (home) {
+			std::string prefix = std::string(home) + "/.config";
+			std::string fullpath = prefix + "/" + fileName;
+			std::ifstream configFile(fullpath);
+
+			// Keep the first match
+			if (configFile.good()) {
+				return fullpath;
+			}
+		}*/
+	}
+
+	// Windows user settings directory
+	{
+		/*char *appdata = getenv("APPDATA");
+
+		if (appdata) {
+			std::string prefix = std::string(appdata);
+			std::string fullpath = prefix + "/" + fileName;
+			std::ifstream configFile(fullpath);
+
+			// Keep the first match
+			if (configFile.good()) {
+				return fullpath;
+			}
+		}*/
+	}
+
+	// Unix system settings directory
+	{
+		std::string fullpath = "/etc/" + fileName;
+		std::ifstream configFile(fullpath);
+
+		// Keep the first match
+		if (configFile.good()) {
+			return fullpath;
+		}
+	}
+
+	// We have to return something, even though we already know this will
+	// fail
+	return fileName;
+}
 
 Parameters::Parameters(std::string fileName) {
+	std::ifstream configFile(findConfigFile(fileName));
+	if (!configFile.is_open()) {
+		std::cout << "ERROR: " << fileName << " cannot be open.\n";
+		exit(EXIT_FAILURE);
+	}
 
-	std::ifstream configFile(fileName.c_str());
 	spreadEntry = getDouble(getParameter("SpreadEntry", configFile));
 	spreadTarget = getDouble(getParameter("SpreadTarget", configFile));
 	maxLength = getUnsigned(getParameter("MaxLength", configFile));
 	priceDeltaLim = getDouble(getParameter("PriceDeltaLimit", configFile));
-	aggressiveVolume = getDouble(getParameter("AggressiveVolume", configFile));
 	trailingLim = getDouble(getParameter("TrailingSpreadLim", configFile));
+	trailingCount = getUnsigned(getParameter("TrailingSpreadCount", configFile));
 	orderBookFactor = getDouble(getParameter("OrderBookFactor", configFile));
 	demoMode = getBool(getParameter("DemoMode", configFile));
+	leg1 = getParameter("Leg1", configFile);
+	leg2 = getParameter("Leg2", configFile);
 	verbose = getBool(getParameter("Verbose", configFile));
-	gapSec = getUnsigned(getParameter("GapSec", configFile));
+	interval = getUnsigned(getParameter("Interval", configFile));
 	debugMaxIteration = getUnsigned(getParameter("DebugMaxIteration", configFile));
-	useFullCash = getBool(getParameter("UseFullCash", configFile));
-	untouchedCash = getDouble(getParameter("UntouchedCash", configFile));
-	cashForTesting = getDouble(getParameter("CashForTesting", configFile));
+	useFullExposure = getBool(getParameter("UseFullExposure", configFile));
+	testedExposure = getDouble(getParameter("TestedExposure", configFile));
 	maxExposure = getDouble(getParameter("MaxExposure", configFile));
+	useVolatility = getBool(getParameter("UseVolatility", configFile));
+	volatilityPeriod = getUnsigned(getParameter("VolatilityPeriod", configFile));
+	cacert = getParameter("CACert", configFile);
 
 	bitfinexApi = getParameter("BitfinexApiKey", configFile);
 	bitfinexSecret = getParameter("BitfinexSecretKey", configFile);
 	bitfinexFees = getDouble(getParameter("BitfinexFees", configFile));
-	bitfinexCanShort = getBool(getParameter("BitfinexCanShort", configFile));
+	bitfinexEnable = getBool(getParameter("BitfinexEnable", configFile));
+	
+	binanceApi = getParameter("BinanceApiKey", configFile);
+	binanceSecret = getParameter("BinanceSecretKey", configFile);
+	binanceFees = getDouble(getParameter("BinanceFees", configFile));
+	binanceEnable = getBool(getParameter("BinanceEnable", configFile));
 
 	sendEmail = getBool(getParameter("SendEmail", configFile));
 	senderAddress = getParameter("SenderAddress", configFile);
@@ -35,9 +108,8 @@ Parameters::Parameters(std::string fileName) {
 	smtpServerAddress = getParameter("SmtpServerAddress", configFile);
 	receiverAddress = getParameter("ReceiverAddress", configFile);
 
-	configFile.close();
+	dbFile = getParameter("DBFile", configFile);
 }
-
 
 void Parameters::addExchange(std::string n, double f, bool h, bool m) {
 	exchName.push_back(n);
@@ -46,51 +118,36 @@ void Parameters::addExchange(std::string n, double f, bool h, bool m) {
 	isImplemented.push_back(m);
 }
 
-
 int Parameters::nbExch() const {
-	return (int)exchName.size();
+	return exchName.size();
 }
 
-
 std::string getParameter(std::string parameter, std::ifstream& configFile) {
-
+	assert(configFile);
 	std::string line;
 	configFile.clear();
 	configFile.seekg(0);
-	if (configFile.is_open()) {
-		while (getline(configFile, line)) {
-			if (line.length() > 0 && line.at(0) != '#') {
-				std::string key = line.substr(0, line.find('='));
-				std::string value = line.substr(line.find('=') + 1, line.length());
-				if (key == parameter) {
-					return value;
-				}
+
+	while (getline(configFile, line)) {
+		if (line.length() > 0 && line.at(0) != '#') {
+			std::string key = line.substr(0, line.find('='));
+			std::string value = line.substr(line.find('=') + 1, line.length());
+			if (key == parameter) {
+				return value;
 			}
 		}
-		std::cout << "ERROR: parameter " << parameter << " not found" << std::endl;
-		return "error";
 	}
-	else {
-		std::cout << "ERROR: file cannot be open" << std::endl;
-		return "error";
-	}
+	std::cout << "ERROR: parameter '" << parameter << "' not found. Your configuration file might be too old.\n" << std::endl;
+	exit(EXIT_FAILURE);
 }
-
 
 bool getBool(std::string value) {
-	if (value == "true") {
-		return true;
-	}
-	else {
-		return false;
-	}
+	return value == "true";
 }
-
 
 double getDouble(std::string value) {
 	return atof(value.c_str());
 }
-
 
 unsigned getUnsigned(std::string value) {
 	return atoi(value.c_str());
