@@ -1,5 +1,11 @@
 #include "Bitfinex.hpp"
 
+/*
+#include <cryptopp/hmac.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/hex.h>
+#include <cryptopp/base64.h>*/
+
 Bitfinex::Bitfinex(const std::string& accessKey, const std::string& secretKey) :
 	accessKey(accessKey),
 	secretKey(secretKey),
