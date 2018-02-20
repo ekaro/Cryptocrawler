@@ -1,10 +1,9 @@
 #include "Bitfinex.hpp"
 
-/*
 #include <cryptopp/hmac.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/hex.h>
-#include <cryptopp/base64.h>*/
+#include <cryptopp/base64.h>
 
 Bitfinex::Bitfinex(const std::string& accessKey, const std::string& secretKey) :
 	accessKey(accessKey),
@@ -39,7 +38,7 @@ bool Bitfinex::inSymbols(const std::string &value, const std::vector<std::string
 	return std::find(symbols.begin(), symbols.end(), value) != symbols.end();
 }
 
-int Bitfinex::getTicker(std::string &result, const std::string &symbol)
+int Bitfinex::getTicker(const std::string &symbol)
 {
 	if (!inSymbols(symbol, symbols))
 	{
@@ -47,7 +46,19 @@ int Bitfinex::getTicker(std::string &result, const std::string &symbol)
 	}
 	std::string endPoint = "/pubticker/" + symbol;
 	std::string params = "";
-	return GETrequest(endPoint, params, result);
+	return GETrequest(endPoint, params, ticker);
+}
+
+std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
+{
+	std::string bid = res.substr(18, 14);
+	std::string ask = res.substr(34, 14);
+	return { bid, ask };
+}
+
+std::string Bitfinex::Ticker()
+{
+	return ticker;
 }
 
 size_t Bitfinex::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)

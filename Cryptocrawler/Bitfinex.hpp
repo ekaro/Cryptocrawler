@@ -11,13 +11,16 @@ public:
 	explicit Bitfinex(const std::string &accessKey, const std::string &secretKey);
 	~Bitfinex();
 
-	int getTicker(std::string &result, const std::string &symbol);
+	int getTicker(const std::string &symbol);
+	std::string Ticker();
+	std::pair<std::string, std::string> getQuote(const std::string &result);
 
 private:
 	std::string accessKey, secretKey;
 	CURL *curl;
 	CURLcode res;
 	std::string APIurl;
+	std::string ticker;
 	std::vector<std::string> symbols; 
 	std::vector<std::string> currencies; 
 	static bool inSymbols(const std::string &value, const std::vector<std::string> &symbols);
