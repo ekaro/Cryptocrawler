@@ -96,7 +96,7 @@ std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
 
 	std::map<std::string, std::string> mapka;
 
-	for (int i = 0; i <= cleared.size() - 1; i += 2)
+	for (size_t i = 0; i <= cleared.size() - 1; i += 2)
 	{
 		mapka.emplace(cleared[i], cleared[i+1]);
 	}
