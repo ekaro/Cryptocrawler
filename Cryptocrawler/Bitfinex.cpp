@@ -33,6 +33,22 @@ Bitfinex::~Bitfinex()
 	curl_easy_cleanup(curl);
 }
 
+
+// Split string by delimiter (can be a string)
+std::vector<std::string> Bitfinex::SplitString(std::string s, std::string delimiter) {
+	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+	std::string token;
+	std::vector<std::string> res;
+	while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+		token = s.substr(pos_start, pos_end - pos_start);
+		pos_start = pos_end + delim_len;
+		res.push_back(token);
+	}
+	res.push_back(s.substr(pos_start));
+	return res;
+}
+
+// Search in vector of strings
 bool Bitfinex::inSymbols(const std::string &value, const std::vector<std::string> &symbols)
 {
 	return std::find(symbols.begin(), symbols.end(), value) != symbols.end();
@@ -51,16 +67,50 @@ int Bitfinex::getTicker(const std::string &symbol)
 
 std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
 {
-	std::string bid = res.substr(18, 14);
-	std::string ask = res.substr(34, 14);
-	return { bid, ask };
+	int errCode;
+	errCode = getTicker(res);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	std::string delimiter = "\"";
+
+	//std::cout << ticker << std::endl;
+
+	std::vector<std::string> quotes = SplitString(ticker, delimiter);
+	
+	std::vector<std::string> cleared;
+	for (auto i : quotes)
+	{
+		if (i.length() > 1)
+		{
+			cleared.push_back(i);
+		}
+	}
+
+	for (auto s : cleared)
+	{
+		//std::cout << s << std::endl;
+	}
+
+	std::map<std::string, std::string> mapka;
+
+	for (int i = 0; i <= cleared.size() - 1; i += 2)
+	{
+		mapka.emplace(cleared[i], cleared[i+1]);
+	}
+
+	for (const auto &p : mapka) {
+		std::cout << p.first << " => " << p.second << '\n';
+	}
+
+	return { quotes[4], quotes[6] };
 }
 
-std::string Bitfinex::Ticker()
-{
-	return ticker;
-}
-
+// Curl write callback function. Appends fetched *content to *userp pointer.
+// *userp pointer is set up by curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result) line.
+// In this case *userp will point to result.
 size_t Bitfinex::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
