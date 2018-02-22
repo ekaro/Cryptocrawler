@@ -14,6 +14,7 @@ public:
 
 	int getTicker(const std::string &symbol);
 	std::pair<std::string, std::string> getQuote(const std::string &result);
+	std::map<std::string, std::string> Map(std::string &response);
 	
 private:
 	std::string accessKey, secretKey;

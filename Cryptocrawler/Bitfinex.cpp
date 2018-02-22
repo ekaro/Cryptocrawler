@@ -65,6 +65,30 @@ int Bitfinex::getTicker(const std::string &symbol)
 	return GETrequest(endPoint, params, ticker);
 }
 
+std::map<std::string, std::string> Bitfinex::Map(std::string &response)
+{
+	std::string delimiter = "\"";
+	std::vector<std::string> data = SplitString(response, delimiter); // splits string into vector by delimiter "
+
+	std::vector<std::string> cleared;
+	for (auto i : data)               // cleares data string from chars of length 1
+	{
+		if (i.length() > 1)
+		{
+			cleared.push_back(i);
+		}
+	}
+
+	std::map<std::string, std::string> mapka;
+
+	for (size_t i = 0; i <= cleared.size() - 1; i += 2)
+	{
+		mapka.emplace(cleared[i], cleared[i + 1]);   // creates a map from cleared string
+	}
+
+	return mapka;
+}
+
 std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
 {
 	int errCode;
@@ -74,38 +98,9 @@ std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
 		std::cout << "Connection problem. Error code: " << errCode << std::endl;
 	}
 
-	std::string delimiter = "\"";
+	std::map<std::string, std::string> TickerMap = Map(ticker);
 
-	//std::cout << ticker << std::endl;
-
-	std::vector<std::string> quotes = SplitString(ticker, delimiter);
-	
-	std::vector<std::string> cleared;
-	for (auto i : quotes)
-	{
-		if (i.length() > 1)
-		{
-			cleared.push_back(i);
-		}
-	}
-
-	for (auto s : cleared)
-	{
-		//std::cout << s << std::endl;
-	}
-
-	std::map<std::string, std::string> mapka;
-
-	for (size_t i = 0; i <= cleared.size() - 1; i += 2)
-	{
-		mapka.emplace(cleared[i], cleared[i+1]);
-	}
-
-	for (const auto &p : mapka) {
-		std::cout << p.first << " => " << p.second << '\n';
-	}
-
-	return { quotes[4], quotes[6] };
+	return { TickerMap.find("bid")->second, TickerMap.find("ask")->second };
 }
 
 // Curl write callback function. Appends fetched *content to *userp pointer.
