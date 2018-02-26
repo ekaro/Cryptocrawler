@@ -12,8 +12,7 @@ public:
 	explicit Bitfinex(const std::string &accessKey, const std::string &secretKey);
 	~Bitfinex();
 
-	int getTicker(const std::string &symbol);
-	std::pair<std::string, std::string> getQuote(const std::string &result);
+	std::map<std::string, std::string> getTicker(const std::string &symbol);
 	std::map<std::string, std::string> Map(std::string &response);
 	
 private:
@@ -22,7 +21,7 @@ private:
 	CURLcode res;
 	std::string APIurl;
 	std::string ticker;
-	std::vector<std::string> symbols; 
+	std::vector<std::string> allsymbols; 
 	std::vector<std::string> currencies; 
 
 	std::vector<std::string> SplitString(std::string s, std::string delimiter);

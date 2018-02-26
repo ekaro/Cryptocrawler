@@ -13,7 +13,7 @@ Bitfinex::Bitfinex(const std::string& accessKey, const std::string& secretKey) :
 	curl = curl_easy_init();
 	APIurl = "https://api.bitfinex.com/v1";
 
-	symbols =
+	allsymbols =
 	{
 		"btcusd", "ltcusd", "ltcbtc",
 		"ethusd", "ethbtc", "etcbtc",
@@ -54,15 +54,24 @@ bool Bitfinex::inSymbols(const std::string &value, const std::vector<std::string
 	return std::find(symbols.begin(), symbols.end(), value) != symbols.end();
 }
 
-int Bitfinex::getTicker(const std::string &symbol)
+std::map<std::string, std::string> Bitfinex::getTicker(const std::string &symbol)
 {
-	if (!inSymbols(symbol, symbols))
+	if (!inSymbols(symbol, allsymbols))
 	{
-		return -40;
+		std::cout << "Symbol is not in supported symbols " << std::endl;
 	}
+
 	std::string endPoint = "/pubticker/" + symbol;
 	std::string params = "";
-	return GETrequest(endPoint, params, ticker);
+	int errCode = GETrequest(endPoint, params, ticker);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	std::map<std::string, std::string> TickerMap = Map(ticker);  // creates std::map from ticker string
+
+	return TickerMap;
 }
 
 std::map<std::string, std::string> Bitfinex::Map(std::string &response)
@@ -87,20 +96,6 @@ std::map<std::string, std::string> Bitfinex::Map(std::string &response)
 	}
 
 	return mapka;
-}
-
-std::pair<std::string, std::string> Bitfinex::getQuote(const std::string &res)
-{
-	int errCode;
-	errCode = getTicker(res);
-	if (errCode != 0)
-	{
-		std::cout << "Connection problem. Error code: " << errCode << std::endl;
-	}
-
-	std::map<std::string, std::string> TickerMap = Map(ticker);
-
-	return { TickerMap.find("bid")->second, TickerMap.find("ask")->second };
 }
 
 // Curl write callback function. Appends fetched *content to *userp pointer.
