@@ -74,6 +74,139 @@ std::map<std::string, std::string> Bitfinex::getTicker(const std::string &symbol
 	return TickerMap;
 }
 
+std::string Bitfinex::getStats(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/stats/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, stats);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return stats;
+}
+
+std::string Bitfinex::getFundingBook(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/lendbook/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, fundingbook);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return fundingbook;
+}
+
+std::string Bitfinex::getOrderBook(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/book/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, orderbook);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return orderbook;
+}
+
+std::string Bitfinex::getTrades(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/trades/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, trades);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return trades;
+}
+
+std::string Bitfinex::getLends(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/lends/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, lends);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return lends;
+}
+
+std::string Bitfinex::getSymbols(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/symbols/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, symbols);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return symbols;
+}
+
+std::string Bitfinex::getSymbolDetails(const std::string &symbol)
+{
+	if (!inSymbols(symbol, allsymbols))
+	{
+		std::cout << "Symbol is not in supported symbols " << std::endl;
+	}
+
+	std::string endPoint = "/symbols_details/" + symbol;
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, symboldetails);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return symboldetails;
+}
+
 std::map<std::string, std::string> Bitfinex::Map(std::string &response)
 {
 	std::string delimiter = "\"";
