@@ -12,6 +12,20 @@ Binance::~Binance()
 	curl_easy_cleanup(curl);
 }
 
+std::string Binance::getPing()
+{
+	std::string endPoint = "/ping";
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, ping);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return ping;
+}
+
 std::string Binance::getTime()
 {
 	std::string endPoint = "/time";
@@ -24,6 +38,20 @@ std::string Binance::getTime()
 	}
 
 	return time;
+}
+
+std::string Binance::getExchangeInfo()
+{
+	std::string endPoint = "/exchangeInfo";
+	std::string params = "";
+
+	int errCode = GETrequest(endPoint, params, exchangeInfo);
+	if (errCode != 0)
+	{
+		std::cout << "Connection problem. Error code: " << errCode << std::endl;
+	}
+
+	return exchangeInfo;
 }
 
 // Curl write callback function. Appends fetched *content to *userp pointer.
