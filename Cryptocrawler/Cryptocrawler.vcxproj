@@ -161,9 +161,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Binance.hpp" />
     <ClInclude Include="Bitfinex.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Binance.cpp" />
     <ClCompile Include="Bitfinex.cpp" />
     <ClCompile Include="Cryptocrawler.cpp" />
   </ItemGroup>
