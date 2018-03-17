@@ -1,5 +1,4 @@
 #include "Bitfinex.hpp"
-
 #include <cryptopp/hmac.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/hex.h>

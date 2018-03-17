@@ -1,4 +1,7 @@
 #include "Binance.hpp"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 Binance::Binance():
 	curl(NULL)
